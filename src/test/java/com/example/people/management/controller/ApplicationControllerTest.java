@@ -25,10 +25,10 @@ public class ApplicationControllerTest {
     @Test
     void testUpdate_Person() throws Exception {
         // Add person
-        Person person = addPerson("Ajith", "Sreekumar");
+        Person person = addPerson(new Person("Ajith", "Sreekumar"));
         assertThat(person).isNotNull();
-        int personId = person.getId();
-        assertThat(personId).isGreaterThan(0);
+        Integer personId = person.getId();
+        assertThat(personId).isNotNull();
         assertEquals("Ajith", person.getFirstName());
         assertEquals("Sreekumar", person.getLastName());
         assertThat(person.getAddresses()).isEmpty();
@@ -41,10 +41,7 @@ public class ApplicationControllerTest {
         long count = countPeople();
         assertThat(count).isEqualTo(1);
         // Edit person
-        person = editPerson(personId, "Aji", "Sree");
-        assertThat(person).isNotNull();
-        assertEquals("Aji", person.getFirstName());
-        assertEquals("Sree", person.getLastName());
+        editPerson(new Person(personId, "Aji", "Sree"));
 
         // Delete person
         deletePerson(personId);
@@ -57,12 +54,12 @@ public class ApplicationControllerTest {
     @Test
     void testUpdate_Multiple_Person() throws Exception {
         // Add person 1
-        Person person1 = addPerson("Ajith", "Sreekumar");
-        int personId1 = person1.getId();
+        Person person1 = addPerson(new Person("Ajith", "Sreekumar"));
+        Integer personId1 = person1.getId();
 
         // Add person 2
-        Person person2 = addPerson("Steve", "Jobs");
-        int personId2 = person2.getId();
+        Person person2 = addPerson(new Person("Steve", "Jobs"));
+        Integer personId2 = person2.getId();
         long count = countPeople();
         assertThat(count).isEqualTo(2);
         // now delete
@@ -77,25 +74,23 @@ public class ApplicationControllerTest {
     @Test
     void testUpdate_Address() throws Exception {
         // Add person 1
-        Person person1 = addPerson("Ajith", "Sreekumar");
-        int personId1 = person1.getId();
+        Person person1 = addPerson(new Person("Ajith", "Sreekumar"));
+        Integer personId1 = person1.getId();
         // Add person 2
-        Person person2 = addPerson("Steve", "Jobs");
-        int personId2 = person2.getId();
+        Person person2 = addPerson(new Person("Steve", "Jobs"));
+        Integer personId2 = person2.getId();
 
-        Address address1 = addAddress(personId1, "street1", "city1", "state1", "postalCode1");
-        Address address2 = addAddress(personId2, "street2", "city2", "state2", "postalCode2");
+        Address address1 = addAddress(personId1, new Address("street1", "city1", "state1", "postalCode1"));
+        Address address2 = addAddress(personId2, new Address("street2", "city2", "state2", "postalCode2"));
         assertEquals("street1", address1.getStreet());
-        int addressId = address1.getId();
-        assertThat(addressId).isGreaterThan(0);
+        Integer addressId = address1.getId();
+        assertThat(addressId).isNotNull();
 
         assertEquals("state2", address2.getState());
         addressId = address2.getId();
-        assertThat(addressId).isGreaterThan(0);
+        assertThat(addressId).isNotNull();
 
-        address2 = editAddress(personId2, addressId, "street22", "city22", "state22", "postalCode22");
-        assertEquals("state22", address2.getState());
-
+        editAddress(personId2, new Address(addressId, "street22", "city22", "state22", "postalCode22"));
         deleteAddress(addressId);
 
         long count = countPeople();
@@ -107,19 +102,15 @@ public class ApplicationControllerTest {
         assertThat(count).isEqualTo(0);
     }
 
-    private Person addPerson(String firstName, String lastName) {
-        return this.restTemplate.postForObject(
-            "http://localhost:" + port + "/demo/person?firstName={firstName}&lastName={lastName}", null, Person.class,
-            firstName, lastName);
+    private Person addPerson(Person person) {
+        return this.restTemplate.postForObject("http://localhost:" + port + "/demo/person", person, Person.class);
     }
 
-    private Person editPerson(int personId, String firstName, String lastName) {
-        return this.restTemplate.postForObject(
-            "http://localhost:" + port + "/demo/person/{personId}?firstName={firstName}&lastName={lastName}", null,
-            Person.class, personId, firstName, lastName);
+    private void editPerson(Person person) {
+        this.restTemplate.put("http://localhost:" + port + "/demo/person", person);
     }
 
-    private void deletePerson(int personId) throws Exception {
+    private void deletePerson(Integer personId) throws Exception {
         this.restTemplate.delete("http://localhost:" + port + "/demo/person/{personId}", personId);
     }
 
@@ -131,21 +122,18 @@ public class ApplicationControllerTest {
         return this.restTemplate.getForObject("http://localhost:" + port + "/demo/person/count", long.class);
     }
 
-    private Address addAddress(int personId, String street, String city, String state, String postalCode) {
-        return this.restTemplate.postForObject(
-            "http://localhost:" + port
-                + "/demo/person/{personId}/address?street={street}&city={city}&state={state}&postalCode={postalCode}",
-            null, Address.class, personId, street, city, state, postalCode);
+    private Address addAddress(Integer personId, Address address) {
+        return this.restTemplate.postForObject("http://localhost:" + port + "/demo/person/{personId}/address", address,
+            Address.class, personId);
     }
 
-    private Address editAddress(int personId, int addressId, String street, String city, String state,
-        String postalCode) {
-        return this.restTemplate.postForObject("http://localhost:" + port
-            + "/demo/person/{personId}/address/{addressId}?street={street}&city={city}&state={state}&postalCode={postalCode}",
-            null, Address.class, personId, addressId, street, city, state, postalCode);
+    private void editAddress(Integer personId, Address address) {
+        this.restTemplate.put("http://localhost:" + port + "/demo/person/{personId}/address", address, Address.class,
+            personId);
     }
 
-    private void deleteAddress(int addressId) throws Exception {
+    private void deleteAddress(Integer addressId) throws Exception {
         this.restTemplate.delete("http://localhost:" + port + "/demo/address/{addressId}", addressId);
     }
 }
+

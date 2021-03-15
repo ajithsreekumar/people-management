@@ -23,7 +23,7 @@ public class PersonServiceImplTest {
         int personId1 = person.getId();
         assertThatThrownBy(() -> personService.editPerson(new Person(invalidPersonId, "Aji", "Sree")))
             .isInstanceOf(PeopleManagementAppException.class)
-            .hasMessageContaining("Person with personId:" + invalidPersonId + " does not exist.");
+            .hasMessageContaining("Person with id " + invalidPersonId + " does not exist.");
 
         // now delete
         personService.deletePerson(personId1);
@@ -37,13 +37,13 @@ public class PersonServiceImplTest {
         assertThatThrownBy(() -> personService.addAddressToPerson(invalidPersonId,
             new Address("street22", "city22", "state22", "postalCode22")))
                 .isInstanceOf(PeopleManagementAppException.class)
-                .hasMessageContaining("Person with personId:" + invalidPersonId + " does not exist.");
+                .hasMessageContaining("Person with id " + invalidPersonId + " does not exist.");
         final Address address1 =
             personService.addAddressToPerson(personId1, new Address("street1", "city1", "state1", "postalCode1"));
         assertThatThrownBy(() -> personService.editAddress(invalidPersonId,
             new Address(address1.getId(), "street22", "city22", "state22", "postalCode22")))
                 .isInstanceOf(PeopleManagementAppException.class)
-                .hasMessageContaining("Person with personId:" + invalidPersonId + " does not exist.");
+                .hasMessageContaining("Person with id " + invalidPersonId + " does not exist.");
         personService.deletePerson(personId1);
     }
 
@@ -71,3 +71,4 @@ public class PersonServiceImplTest {
         personService.deletePerson(personId2);
     }
 }
+
